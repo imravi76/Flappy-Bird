@@ -1,6 +1,8 @@
 /**
    Nano Bird - a flappy bird clone for arduino nano, oled screen & push on switch
 
+   Based on the original code found here: https://kotaku.com/it-only-takes-17-lines-of-code-to-clone-flappy-bird-1678240994
+
    @author  Richard Allsebrook <richardathome@gmail.com>
 */
 
@@ -26,7 +28,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SPRITE_WIDTH    16
 
 // Two frames of animation
-static const unsigned char PROGMEM bird1_bmp[] =
+static const unsigned char PROGMEM wing_down_bmp[] =
 { B00000000, B00000000,
   B00000000, B00000000,
   B00000011, B11000000,
@@ -45,7 +47,7 @@ static const unsigned char PROGMEM bird1_bmp[] =
   B00000000, B00000000,
 };
 
-static const unsigned char PROGMEM bird2_bmp[] =
+static const unsigned char PROGMEM wing_up_bmp[] =
 { B00000000, B00000000,
   B00000000, B00000000,
   B00000011, B11000000,
@@ -133,31 +135,27 @@ void loop() {
       momentum = -2;
     }
 
+    // display the bird
     // if the momentum on the bird is negative the bird is going up!
     if (momentum < 0) {
 
       // display the bird using a randomly picked flap animation frame
       if (random(2) == 0) {
-
-        // wind down
-        display.drawBitmap(bird_x, bird_y, bird1_bmp, 16, 16, WHITE);
+        display.drawBitmap(bird_x, bird_y, wing_down_bmp, 16, 16, WHITE);
       }
       else {
-
-        // wing up
-        display.drawBitmap(bird_x, bird_y, bird2_bmp, 16, 16, WHITE);
-
+        display.drawBitmap(bird_x, bird_y, wing_up_bmp, 16, 16, WHITE);
       }
 
     }
     else {
 
       // bird is currently falling, use wing up frame
-      display.drawBitmap(bird_x, bird_y, bird2_bmp, 16, 16, WHITE);
+      display.drawBitmap(bird_x, bird_y, wing_up_bmp, 16, 16, WHITE);
 
     }
 
-    // now we move the walls and see if the player has hit anything
+    // now we draw the walls and see if the player has hit anything
     for (int i = 0 ; i < 2; i++) {
 
       // draw the top half of the wall
@@ -187,11 +185,13 @@ void loop() {
         &&
         (bird_y < wall_y[i] || bird_y + SPRITE_HEIGHT > wall_y[i] + wall_gap) // not level with the gap
       ) {
-        game_state = 1;
-
+        
         // display the crash and pause 1/2 a second
         display.display();
         delay(500);
+
+        // switch to game over state
+        game_state = 1; 
 
       }
 
@@ -202,7 +202,7 @@ void loop() {
     // display the current score
     boldTextAtCenter(0, (String)score);
 
-    // now display everything to the user and wait
+    // now display everything to the user and wait a bit to keep things playable
     display.display();
     delay(GAME_SPEED);
 
@@ -214,10 +214,10 @@ void loop() {
     screenWipe(10);
 
     outlineTextAtCenter(1, "NANO BIRD");
-
+    
     textAtCenter(display.height() / 2 - 8, "GAME OVER");
     textAtCenter(display.height() / 2, String(score));
-
+    
     boldTextAtCenter(display.height() - 16, "HIGH SCORE");
     boldTextAtCenter(display.height()  - 8, String(high_score));
 
@@ -241,35 +241,48 @@ void loop() {
     // start a new game
     screenWipe(10);
     game_state = 0;
+    
   }
 
 }
 
+/**
+ * clear the screen using a wipe down animation
+ */
 void screenWipe(int speed) {
 
+  // progressivly fill screen with white
   for (int i = 0; i < display.height(); i += speed) {
     display.fillRect(0, i, display.width(), speed, WHITE);
     display.display();
   }
 
+  // progressively fill the screen with black
   for (int i = 0; i < display.height(); i += speed) {
     display.fillRect(0, i, display.width(), speed, BLACK);
     display.display();
   }
 
-  display.clearDisplay();
-
 }
 
+/**
+ * displays txt at x,y coordinates
+ */
 void textAt(int x, int y, String txt) {
   display.setCursor(x, y);
   display.print(txt);
 }
 
+/**
+ * displays text centered on the line
+ */
 void textAtCenter(int y, String txt) {
   textAt(display.width() / 2 - txt.length() * 3, y, txt);
 }
 
+/**
+ * displays outlined text centered on the line
+ */
 void outlineTextAtCenter(int y, String txt) {
   int x = display.width() / 2 - txt.length() * 3;
 
@@ -285,6 +298,9 @@ void outlineTextAtCenter(int y, String txt) {
 
 }
 
+/**
+ * displays bold text centered on the line
+ */
 void boldTextAtCenter(int y, String txt) {
   int x = display.width() / 2 - txt.length() * 3;
 
