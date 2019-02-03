@@ -73,8 +73,8 @@ int high_score = 0; // highest score since the nano was reset
 int bird_x = (int)display.width() / 4; // birds x position (along) - initialised to 1/4 the way along the screen
 int bird_y; // birds y position (down)
 int momentum = 0; // how much force is pulling the bird down
-int wx[2]; // an array to hold the walls x positions
-int wy[2]; // an array to hold the walls y positions
+int wall_x[2]; // an array to hold the walls x positions
+int wall_y[2]; // an array to hold the walls y positions
 int wall_gap = 30; // size of the wall wall_gap in pixels
 int wall_width = 10; // width of the wall in pixels
 
@@ -161,20 +161,20 @@ void loop() {
     for (int i = 0 ; i < 2; i++) {
 
       // draw the top half of the wall
-      display.fillRect(wx[i], 0, wall_width, wy[i], WHITE);
+      display.fillRect(wall_x[i], 0, wall_width, wall_y[i], WHITE);
 
       // draw the bottom half of the wall
-      display.fillRect(wx[i], wy[i] + wall_gap, wall_width, display.height() - wy[i] + wall_gap, WHITE);
+      display.fillRect(wall_x[i], wall_y[i] + wall_gap, wall_width, display.height() - wall_y[i] + wall_gap, WHITE);
 
       // if the wall has hit the edge of the screen
       // reset it back to the other side with a new gap position
-      if (wx[i] < 0) {
-        wy[i] = random(0, display.height() - wall_gap);
-        wx[i] = display.width();
+      if (wall_x[i] < 0) {
+        wall_y[i] = random(0, display.height() - wall_gap);
+        wall_x[i] = display.width();
       }
 
       // if the bird has passed the wall, update the score
-      if (wx[i] == bird_x) {
+      if (wall_x[i] == bird_x) {
         score++;
 
         // highscore is whichever is bigger, the current high score or the current score
@@ -183,9 +183,9 @@ void loop() {
 
       // if the bird is level with the wall and not level with the gap - game over!
       if (
-        (bird_x + SPRITE_WIDTH > wx[i] && bird_x < wx[i] + wall_width) // level with wall
+        (bird_x + SPRITE_WIDTH > wall_x[i] && bird_x < wall_x[i] + wall_width) // level with wall
         &&
-        (bird_y < wy[i] || bird_y + SPRITE_HEIGHT > wy[i] + wall_gap) // not level with the gap
+        (bird_y < wall_y[i] || bird_y + SPRITE_HEIGHT > wall_y[i] + wall_gap) // not level with the gap
       ) {
         game_state = 1;
 
@@ -196,7 +196,7 @@ void loop() {
       }
 
       // move the wall left 4 pixels
-      wx[i] -= 4;
+      wall_x[i] -= 4;
     }
 
     // display the current score
@@ -229,10 +229,10 @@ void loop() {
     // setup a new game
     bird_y = display.height() / 2;
     momentum = -4;
-    wx[0] = display.width() ;
-    wy[0] = display.height() / 2 - wall_gap / 2;
-    wx[1] = display.width() + display.width() / 2;
-    wy[1] = display.height() / 2 - wall_gap / 1;
+    wall_x[0] = display.width() ;
+    wall_y[0] = display.height() / 2 - wall_gap / 2;
+    wall_x[1] = display.width() + display.width() / 2;
+    wall_y[1] = display.height() / 2 - wall_gap / 1;
     score = 0;
 
     // wait until the user presses the button
@@ -240,9 +240,8 @@ void loop() {
 
     // start a new game
     screenWipe(10);
-    game_state = 1
+    game_state = 0;
   }
-
 
 }
 
