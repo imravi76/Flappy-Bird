@@ -72,7 +72,7 @@ int score = 0; // current game score
 int high_score = 0; // highest score since the nano was reset
 int bird_x = (int)display.width() / 4; // birds x position (along) - initialised to 1/4 the way along the screen
 int bird_y; // birds y position (down)
-int vy = 0; // how much force is pulling the bird down
+int momentum = 0; // how much force is pulling the bird down
 int wx[2]; // an array to hold the walls x positions
 int wy[2]; // an array to hold the walls y positions
 int wall_gap = 30; // size of the wall wall_gap in pixels
@@ -112,14 +112,14 @@ void loop() {
     // Once this foce goes negative the bird goes up, otherwise it falls towards the ground
     // gaining speed
     if (digitalRead(FLAP_BUTTON) == LOW) {
-      vy = -4;
+      momentum = -4;
     }
 
     // increase the downward force on the bird
-    vy += 1;
+    momentum += 1;
 
     // add the downward force to the bird position to determine it's new position
-    bird_y += vy;
+    bird_y += momentum;
 
     // make sure the bird doesn't fly off the top of the screen
     if (bird_y < 0 ) {
@@ -130,11 +130,11 @@ void loop() {
     // give it a slight positive lift so it 'waddles' along the ground.
     if (bird_y > display.height() - SPRITE_HEIGHT) {
       bird_y = display.height() - SPRITE_HEIGHT;
-      vy = -2;
+      momentum = -2;
     }
 
-    // if the downward force on the bird is negative the bird is going up!
-    if (vy < 0) {
+    // if the momentum on the bird is negative the bird is going up!
+    if (momentum < 0) {
 
       // display the bird using a randomly picked flap animation frame
       if (random(2) == 0) {
@@ -223,19 +223,24 @@ void loop() {
 
     display.display();
 
+    // wait while the user stops pressing the button
     while (digitalRead(FLAP_BUTTON) == LOW);
 
+    // setup a new game
     bird_y = display.height() / 2;
-    vy = -4;
+    momentum = -4;
     wx[0] = display.width() ;
     wy[0] = display.height() / 2 - wall_gap / 2;
     wx[1] = display.width() + display.width() / 2;
     wy[1] = display.height() / 2 - wall_gap / 1;
-    game_state = score = 0;
+    score = 0;
 
+    // wait until the user presses the button
     while (digitalRead(FLAP_BUTTON) == HIGH);
 
+    // start a new game
     screenWipe(10);
+    game_state = 1
   }
 
 
