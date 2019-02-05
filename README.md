@@ -9,7 +9,7 @@ which boils the game down into its elements brilliantly.
 https://kotaku.com/it-only-takes-17-lines-of-code-to-clone-flappy-bird-1678240994
 
 There's a few re-usable text routines at the end to help you get a bit more out 
-of the build it fonts.
+of the built it fonts.
 
 Video of it running: https://youtu.be/DJYTGIEwXBs
 
