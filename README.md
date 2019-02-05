@@ -11,3 +11,5 @@ https://kotaku.com/it-only-takes-17-lines-of-code-to-clone-flappy-bird-167824099
 There's a few re-usable text routines at the end to help you get a bit more out 
 of the build it fonts.
 
+Video of it running: https://youtu.be/DJYTGIEwXBs
+
